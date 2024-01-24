@@ -1,23 +1,53 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useEffect, useState } from "react";
+import Expenses from "./components/Expences/Expenses";
+import NewExpense from "./components/NewExpense/NewExpense";
+import axios from "axios";
 
 function App() {
+  const [expenses, setExpenses] = useState([]);
+  const [isDataChange, setIsDataChange] = useState(true);
+
+  useEffect(() => {
+    const response = axios.get("http://localhost:3001/expenses");
+    response
+      .then((result) => {
+        setExpenses(result.data);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }, [isDataChange]);
+
+  const addExpense = (newValues) => {
+    const response = axios.post("http://localhost:3001/expense", {
+      ...newValues,
+    });
+    response
+      .then((data) => {
+        console.log("Saved");
+        setIsDataChange((prev) => !prev);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
+
+  const deleteExpense = (Id) => {
+    const response = axios.delete(`http://localhost:3001/expense/${Id}`);
+    response
+      .then((data) => {
+        console.log("deleted");
+        setIsDataChange((prev) => !prev);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <NewExpense addExpense={addExpense} />
+      <Expenses expenses={expenses} deleteExpense={deleteExpense} />
     </div>
   );
 }
